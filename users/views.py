@@ -4,6 +4,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 from .permissions import IsAccountOwner
+from django.contrib.auth.hashers import make_password
 
 
 class UserView(APIView):
@@ -25,7 +26,7 @@ class UserDetailView(APIView):
 
     def get(self, request: Request, pk: int) -> Response:
         """
-        Obtençao de usuário
+        Obtenção de usuário
         """
         user = get_object_or_404(User, pk=pk)
 
@@ -36,12 +37,13 @@ class UserDetailView(APIView):
         return Response(serializer.data)
 
     def patch(self, request: Request, pk: int) -> Response:
-        """
-        Atualização de usuário
-        """
         user = get_object_or_404(User, pk=pk)
-
         self.check_object_permissions(request, user)
+
+        password = request.data.get("password")
+        if password:
+            hashed_password = make_password(password)
+            request.data["password"] = hashed_password
 
         serializer = UserSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -51,7 +53,7 @@ class UserDetailView(APIView):
 
     def delete(self, request: Request, pk: int) -> Response:
         """
-        Deleçao de usuário
+        Deleção de usuário
         """
         user = get_object_or_404(User, pk=pk)
 
