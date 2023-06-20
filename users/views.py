@@ -6,18 +6,12 @@ from django.shortcuts import get_object_or_404
 from .permissions import IsAccountOwner
 from django.contrib.auth.hashers import make_password
 
+from utilis.generic_view import CreateAPIView
 
-class UserView(APIView):
-    def post(self, request: Request) -> Response:
-        """
-        Registro de usuários
-        """
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        serializer.save()
-
-        return Response(serializer.data, status.HTTP_201_CREATED)
+class UserView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class UserDetailView(APIView):
